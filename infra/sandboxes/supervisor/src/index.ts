@@ -345,7 +345,11 @@ app.post("/computers", async (c) => {
           runtimeInfo || hostUid === undefined || hostGid === undefined || hostUid === 0
             ? COMPUTER_GID
             : hostGid;
-        await assertComputerHomeWritable(serviceHomePath, effectiveUid, effectiveGid);
+        // Windows files carry no POSIX owner, and Docker Desktop shares them with every uid in
+        // the container, so the ownership check (which also reads /proc) only applies elsewhere.
+        if (process.platform !== "win32") {
+          await assertComputerHomeWritable(serviceHomePath, effectiveUid, effectiveGid);
+        }
         const name = containerNameFor(body.botId);
         const createdNetwork =
           screenNetworkMode === "internal"

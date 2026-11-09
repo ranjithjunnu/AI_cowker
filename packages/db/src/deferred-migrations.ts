@@ -187,6 +187,8 @@ export async function deployMigrations(input: {
         execFileSync("pnpm", ["exec", "prisma", "migrate", "deploy"], {
           cwd: input.dbPackageDir,
           stdio: "inherit",
+          // Windows finds pnpm's .cmd launcher only through a shell.
+          shell: process.platform === "win32",
           env: {
             ...process.env,
             DATABASE_MIGRATION_URL: deployUrl,
